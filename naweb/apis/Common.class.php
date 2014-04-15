@@ -6,19 +6,34 @@ class Common{
         $http_method, 
         $request, 
         $path, 
-        $token=None, 
+        $token, 
         $payload, 
         $timeout=10, 
         $headers=array(), 
         $response_type='json'
     ){
+        global $logger;
         $url = $uri . $path;
-
-        $headers = array(
-            "Content-Type: application/json",
-            "User-Agent: com.sdgtl.htc.watch/1.0 (build:4; model:Nexus 4; device:mako; mcc:234; mnc:30; fp:google/occam/mako:4.3/JWR66Y/776638:user/release-keys; cid:"
-        );
+        $logger->debug("url on common.class.php line 17: ".$url."<br/>");
+        $headers = array( "Content-Type: application/json" );
+        $logger->debug( "<br/>token: ".$token );
         
+        // not delete and GET, MD5 the payload
+        
+        if( !in_array( $http_method, array("DELETE", "GET"))){
+            $payload = json_encode( $payload );
+            //var_dump($payload);
+            //die();
+            $headers[]="content-md5: ".md5($payload);
+        }
+        if ( $token ){
+            $headers[]='Authorization: '.$token;
+            $headers[]='AuthKey: '.$token;
+            $headers[]='User-Agent: '. 
+                'com.sdgtl.htc.watch/1.0 (build:4; model:Nexus 4; device:mako; mcc:234; mnc:30; fp:google/occam/mako:4.3/JWR66Y/776638:user/release-keys; cid:';
+            
+        }
+
         //echo "<p>method: ".$http_method."</p>";
         //$url.="?".http_build_query($payload);
         //echo "<p>URL: ".$url."</p>";
@@ -33,11 +48,18 @@ class Common{
                 $curl = curl_init( $url );
                 curl_setopt ( $curl, CURLOPT_CUSTOMREQUEST, $http_method);
                 curl_setopt ( $curl, CURLOPT_POSTFIELDS, $payload);
+                echo "<p><b>";
+                var_dump($payload);
+                echo "</b></p>";
                 break;
         }        
         curl_setopt ( $curl, CURLOPT_HEADER, true );
         curl_setopt ( $curl, CURLOPT_RETURNTRANSFER, true );
         curl_setopt ( $curl, CURLOPT_HTTPHEADER, $headers);
+        //echo "<p><b>";
+        //var_dump($headers);
+       // echo "</b></p>";
+        //$logger->debug( "<br/>Headers: ".print_r($headers) );
         $response = curl_exec( $curl );
         //var_dump($curl);
         //echo "<p>";

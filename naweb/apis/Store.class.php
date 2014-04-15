@@ -16,7 +16,10 @@ class Store
     ){
         $auth_token = null;
         if( $token ){
-            $auth_token = "";
+            $auth_token = $cache.get(get_cache_slug()."token");
+            $logger->debug( "store use token" );
+            $token = $cache->get( get_cache_slug()."token");
+            $token = base64_decode($token);
         }
         //uri = g.conf['storefront'] + entry_point
         $uri="https://staging-store.sd-ngp.net/api/v1";
